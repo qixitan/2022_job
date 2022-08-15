@@ -1,0 +1,494 @@
+# 数据结构
+
+## 链表
+
+### 定义
+
+```C++
+// 单链表
+struct ListNode{
+    int val;
+    ListNode *next;
+    ListNode(int x):val(x), next(null)
+}
+```
+
+```python
+class ListNode:
+    def __init__(self, val, next=None):
+        self.value = val
+        self.next = next
+```
+
+## 哈希表
+
+| 集合               | 底层实现 | 是否有序 | 数值是否可以重复 | 能否可更改数值 | 查询效率 | 增删效率 |
+| :----------------- | :------- | :------- | ---------------- | -------------- | -------- | -------- |
+| std::set           | 红黑树   | 有序     | 否               | 否             | O(log n) | O(log n) |
+| std::multiset      | 红黑树   | 有序     | 是               | 否             | O(log n) | O(log n) |
+| std::unordered_set | 哈希表   | 无序     | 否               | 否             | O(1)     | O(1)     |
+
+| 映射               | 底层实现 | 是否有序 | 数值是否可以重复 | 能否可更改数值 | 查询效率 | 增删效率 |
+| ------------------ | -------- | -------- | ---------------- | -------------- | -------- | -------- |
+| std::map           | 红黑树   | key有序  | key不可重复      | key不可修改    | O(log n) | O(log n) |
+| std::multimap      | 红黑树   | key有序  | key可重复        | key不可修改    | O(log n) | O(log n) |
+| std::unordered_set | 哈希表   | key无序  | key不可重复      | key不可修改    | O(1)     | O(1)     |
+
+
+
+## 队列
+
+#### 定义
+
+```C++
+// queue<Type, Container> (<数据类型，容器类型>）
+// 初始化时必须要有数据类型，容器可省略，省略时则默认为deque 类型
+// queue<int> q1;
+// 用list容器实现的queue 
+// queue＜char, list＜char＞＞q1；
+// 用deque容器实现的queue 
+// queue＜int, deque＜int＞＞q2；
+// 注意：不能用vector容器初始化queue
+
+queue<int> q;
+q.push(1);	// 在队尾插入一个元素
+q.pop();	// 将队列中最靠前的元素删除 无返回值
+q.size()	// 返回队列中元素个数
+q.empty()	// 队列为空，返回true， 非空，返回false。
+q.front()	//  返回队列最前一个元素
+q.back()  	//  返回队列最后一个元素
+
+```
+
+
+
+## 字符串
+
+### 删除多余空格
+
+```C++
+void removeExtraSpace(string &s){  
+    int slowIndex = 0, fastIndex = 0;  
+    while(s.size()>0 && fastIndex < s.size() && s[fastIndex]==' '){  
+        fastIndex++;  
+    }  
+    for(; fastIndex<s.size(); fastIndex++){  
+        if(fastIndex-1>0 && s[fastIndex] == ' ' && s[fastIndex] == s[fastIndex-1]) continue;  
+        else s[slowIndex++] = s[fastIndex];  
+        }  
+        if (slowIndex-1>0 && s[slowIndex-1] == ' ') {  
+            s.resize(slowIndex - 1);  // 去掉字符串末尾的空格  
+        }  
+        else {    
+            s.resize(slowIndex);    // 重新设置字符串大小  
+        }  
+}
+```
+
+
+
+## 二叉树
+
+### 定义
+
+```c++
+struct TreeNode {
+    int val;
+    TreeNode *left;
+    TreeNode *right;
+    TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+};
+```
+
+其中，TreeNode(int x) : val(x), left(NULL), right(NULL) {}  是构造函数，C语言中的结构体(struct)是C++中类(class) 的祖先，所以C++结构体也右构造函数。
+
+构造函数可以不写，但当new一个新节点是回比较麻烦。例如有构造函数，定义初始值为9的节点
+
+```C++
+TreeNode* a = new TreeNode(9);
+```
+
+没有构造函数时：
+
+```C++
+TreeNode* a = new TreeNode();
+a->val = 9;
+a->left = NULL;
+a->right = NULL;
+```
+
+```python
+class TreeNode():
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+```
+
+### 基础知识
+
+度：树中某个节点的孩子个数(二叉树最大度为2)
+
+完全二叉树： 除底层节点没有填满外，其余每层节点数都达到最大值，并且最下层节点都集中在该层最左侧的位置。
+
+二叉搜索树(Binary Search Tree, BST)：是一个**有序树**， 
+
+1. 若左子树不为空，左子树节点的值都小于根节点的值。
+2. 若右子树不为空，则右子树节点的值都大于根节点的值。
+
+平衡二叉搜索树：空树，或左右子树高度差的绝对值不超过1.且左右子树都是平衡二叉树。
+
+遍历方式：
+
+1. 深度优先：前序遍历，中序遍历，后序遍历；（递归、迭代）
+2. 广度优先；（迭代）
+
+### 递归遍历
+
+用递归进行二叉树的前序遍历
+
+```C++
+class Solution{
+public:
+    void traversal(TreeNode *cur, vector<int>&vec){  // 1.确定递归参数和返回值
+        if(cur==NULL) return; // 2.确定终止条件
+        // 3.单层的递归逻辑
+        vec.push_back(cur->val);  		// 中
+        traversal(cur->left, vec);		// 左
+        traversal(cur->right, vec); 	// 右  
+    }
+    vector<int> preorderTraversal(TreeNode*root){
+        vector<int> result;
+        traversal(root, result);
+        return result;
+    }
+}
+```
+
+用递归进行二叉树的中序遍历
+
+```C++
+class Solution{
+public:
+    void traversal(TreeNode *cur, vector<int>&vec){  // 1.确定递归参数和返回值
+        if(cur==NULL) return; // 2.确定终止条件
+        // 3.单层的递归逻辑
+        traversal(cur->left, vec);		// 左
+        vec.push_back(cur->val);  		// 中
+        traversal(cur->right, vec); 	// 右  
+    }
+    vector<int> inorderTraversal(TreeNode*root){
+        vector<int> result;
+        traversal(root, result);
+        return result;
+    }
+}
+```
+
+
+
+用递归进行二叉树的后序遍历
+
+```C++
+class Solution{
+public:
+    void traversal(TreeNode *cur, vector<int>&vec){  // 1.确定递归参数和返回值
+        if(cur==NULL) return; // 2.确定终止条件
+        // 3.单层的递归逻辑
+        traversal(cur->left, vec);		// 左
+        traversal(cur->right, vec); 	// 右 
+        vec.push_back(cur->val);  		// 中
+    }
+    vector<int> postorderTraversal(TreeNode*root){
+        vector<int> result;
+        traversal(root, result);
+        return result;
+    }
+}
+```
+
+### 迭代（非递归）遍历
+
+利用迭代进行二叉树前序遍历
+
+```C++
+// 为什么要先加入 右孩子，再加入左孩子呢？ 因为这样出栈的时候才是中左右的顺序。
+class Solution{
+public:
+    vector<int>preorderTraversal(TreeNode*root){
+        stack<TreeNode*> st;
+        vector<int> result;
+        if(root==NULL) rteurn result;
+        st.push(root);
+        while(!st.empty()){
+            TreeNode*Node = st.top();  // 中
+            st.pop();
+            result.push_back(node->val);
+            if(node->right) st.pust(node->right); // 右
+            if(node->left) st.push(node->left);  // 左
+        }
+        return result;
+    }
+};
+```
+
+利用迭代进行二叉树中序遍历
+
+```C++
+class Solution{
+public:
+    vector<int> inorderTraversal(TreeNode*root){
+        vector<int> result;
+        stack<TreeNode*> st;
+        TreeNode* cur = root;
+        while(cur !=NULL || !st.empty()){
+            if(cur!=NULL){
+                st.push(cur);
+                cur = cur->left;
+            }else{
+                cur = st.top();
+                st.pop();
+                result.push_back(cur->val);
+                cur = cur->reight;
+            }
+        }
+        return result;
+    }
+}
+```
+
+利用迭代进行二叉树后序遍历
+
+![](READNE.assets/20200808200338924.png)
+
+```C++
+class Solution{
+public:
+    vector<int>posteorderTraversal(TreeNode*root){
+        stack<TreeNode*> st;
+        vector<int> result;
+        if(root==NULL) rteurn result;
+        st.push(root);
+        while(!st.empty()){
+            TreeNode*Node = st.top();  // 中
+            st.pop();
+            result.push_back(node->val);
+            if(node->left) st.push(node->left);  // 左
+            if(node->right) st.pust(node->right); // 右
+        }
+        reverse(result.begin(), result.end());
+        return result;
+    }
+};
+```
+
+### 二叉树层序遍历
+
+```C++
+class Solution {
+public:
+    vector<vector<int>> levelOrder(TreeNode* root) {
+        queue<TreeNode*> que;
+        if (root != NULL) que.push(root);
+        vector<vector<int>> result;
+        while (!que.empty()) {
+            int size = que.size();
+            vector<int> vec;
+            // 这里一定要使用固定大小size，不要使用que.size()，因为que.size是不断变化的
+            for (int i = 0; i < size; i++) {
+                TreeNode* node = que.front();
+                que.pop();
+                vec.push_back(node->val);
+                if (node->left) que.push(node->left);
+                if (node->right) que.push(node->right);
+            }
+            result.push_back(vec);
+        }
+        return result;
+    }
+};
+```
+
+### 对称二叉树
+
+![](READNE.assets/对称二叉树.png)
+
+**正是因为要遍历两棵树而且要比较内侧和外侧节点，所以准确的来说是一个树的遍历顺序是左右中，一个树的遍历顺序是右左中。**
+
+### 二叉树节点的高度和深度
+
+二叉树节点的深度：指**从根节点**到该节点的最长简单路径边的条数；
+
+二叉树节点的高度：指**从该节点到**叶子节点的最长简单路径边的条数；
+
+![](READNE.assets/二叉树高度与深度.png)
+
+
+
+高度与深度的计算中：leetcode中是以节点为一度，维基百科是以边为一度，以leetcode为准
+
+
+
+# 算法
+
+## 递归
+
+1. **确定递归函数的参数和返回值：**确定哪些参数是递归过程中需要处理的，那么就在*<u>递归函数里加上这个参数</u>*，并且还要*<u>明确每次递归的返回值</u>*是什么，进而*<u>确定递归函数的返回类型</u>*。
+2. **确定终止条件：**写完了递归算法，运行的时候，经常回遇到栈溢出的错误，就是没有写终止条件或者终止条件错误，操作系统也是用一个栈的结构保存每一层递归的信息，如果递归没有终止，则操作系统的内存栈必然溢出。
+3. **确定单层递归的逻辑：**确定每一层递归需要处理的信息。在这里也就会*<u>重复调用自己</u>*来实现递归的过程。
+
+## 回溯
+
+回溯法也可以叫做回溯搜索法，它是一种搜索的方式。**回溯函数也就是递归函数，指的都是一个函数。** 回溯的本质是穷举，穷举所有可能。如果想让回溯法高效一些，可以加一些剪枝的操作，但也改不了回溯法就是穷举的本质。
+
+**回溯法解决的问题都可以抽象为树形结构， 集合的大小就构成了树的宽度，递归的深度，都构成的树的深度**。
+
+```c++
+// 模板
+void backtracking(参数) {
+    if (终止条件) {
+        存放结果;
+        return;
+    }
+
+    for (选择：本层集合中元素（树中节点孩子的数量就是集合的大小）) {
+        处理节点;
+        backtracking(路径，选择列表); // 递归
+        回溯，撤销处理结果
+    }
+}
+```
+
+
+
+## 贪心
+
+**贪心的本质是选择每一阶段的局部最优，从而达到全局最优**。
+
+例如，有一堆钞票，你可以拿走十张，如果想达到最大的金额，你要怎么拿？指定每次拿最大的，最终结果就是拿走最大数额的钱。每次拿最大的就是局部最优，最后拿走最大数额的钱就是推出全局最优。再举一个例子如果是 有一堆盒子，你有一个背包体积为n，如何把背包尽可能装满，如果还每次选最大的盒子，就不行了。这时候就需要动态规划。
+
+贪心算法一般分为如下四步：
+
+1. 将问题分解为若干个子问题
+2. 找出适合的贪心策略
+3. 求解每一个子问题的最优解
+4. 将局部最优解堆叠成全局最优解
+
+## 动态规划
+
+动态规划（Dynamic Programming， DP），如果某一问题有很多重叠子问题，使用动态规划是最有效的。
+
+所有动态规划中每一个状态一定是由上一个状态推导出来的，**这一点区别于贪心**，贪心算法没有状态推导，而是从局部直接选最优。
+
+### 动态规划解题五部曲
+
+1. 确定dp数组以及其下表的含义
+2. 确定递推公式
+3. dp数组如何初始化
+4. 确定遍历顺序
+5. 举例推导dp数组
+
+# 算法题
+
+## 整数拆分
+
+[力扣题目链接](https://leetcode.cn/problems/integer-break/)：给定一个正整数 `n` ，将其拆分为 `k` 个 **正整数** 的和（ `k >= 2` ），并使这些整数的乘积最大化。
+
+返回 *你可以获得的最大乘积* 。
+
+**解题思路：**
+
+- 设奖整数n拆分为a个小数字：
+
+$$
+n = n_1+n_2+...+n_\alpha
+$$
+
+- 本题等价于求解
+
+$$
+max(n_1×n_2×...×n_\alpha)
+$$
+
+> 以下是数学推导过程
+
+数学推导：
+$$
+\frac{n_1 + n_2 + ... + n_a} {\alpha} \geq \sqrt[\alpha]{n_1n_2...n_q}
+$$
+
+> **推论一：**若拆分的数量a确定，则拆分数字相等时，乘积最大
+
+设将数字因子$x$等分为α个，即n=xα，则乘积为x^a^。观察以下公式，由于n为常数，因此当$x^\frac{1}{n}$取最大值时，乘积达到最大。
+$$
+x^\alpha = x ^\frac{n}{x} = (x ^\frac{1}{x})^n
+$$
+根据问题分析，可将问题转化为求y=x^1/x^的极大值，因此对x求导数。
+$$
+\\lny = \frac{1}{n}*lnx  
+\\ \frac{1}{y}\hat{y} = \frac{1}{x^2} - \frac{1}{x^2}lnx = \frac{1-lnx}{x^2}
+\\ \hat{y}=\frac{1-lnx}{x^2}x^\frac{1}{x}
+$$
+令$\hat{y}=0$,则$1-lnx = 0$,易得驻点为$x_0=e \approx2.7$；根据以下公式可知$x_0$为极大值点
+$$
+\hat{y} = \begin{cases} > 0，x \in[-\infty, e) \\ < 0， X\in (e, +\infty]\end{cases}
+$$
+
+- 由于因子$x$必须为整数，最洁净$e$的整数为2或3，如下式所示，代入$x=2$和$x=3$，得出$x=3$时乘积达到最大。
+
+$$
+y(3) = 3^\frac{1}{3} \approx1.44
+\\ y(2) = 2^\frac{1}{2} \approx1.41
+$$
+
+- 口算对比方法：给两数字同取6次方，在对比。
+
+$$
+[y(3)]^6 = (3^ \frac{1}{3})^6 = 9
+\\ [y[2]^6] =(2^\frac{1}{2})^6 = 8
+$$
+
+> **推论二：**将数字尽可能以因子3等分时，乘积最大。
+
+拆分规则：
+
+1. **最优： **3。把数字 n 可能拆为多个因子 3 ，余数可能为 0,1,2三种情况。
+2. **次优：** 2。若余数为 2 ；则保留，不再拆为 1+1 。
+3. **最差：** 1 。若余数为 1 ；则应把一份 $3+1$ 替换为$2+2$，因为 $2× 2 > 3 ×1$。
+
+```c++
+class Solution {
+public:
+    int integerBreak(int n) {
+        if (n == 2) return 1;
+        if (n == 3) return 2;
+        if (n == 4) return 4;
+        int result = 1;
+        while (n > 4) {
+            result *= 3;
+            n -= 3;
+        }
+        result *= n;
+        return result;
+    }
+};
+```
+
+动态规划：
+
+```c++
+class Solution {
+public:
+    int integerBreak(int n) {
+        vector<int> dp(n + 1);
+        dp[2] = 1;
+        for (int i = 3; i <= n ; i++) {
+            for (int j = 1; j < i - 1; j++) {
+                dp[i] = max(dp[i], max((i - j) * j, dp[i - j] * j));
+            }
+        }
+        return dp[n];
+    }
+};
+```
+
