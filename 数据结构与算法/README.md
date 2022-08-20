@@ -420,7 +420,7 @@ $$
 
 
 $$
-\frac{n_1 + n_2 + ... + n_a} {\alpha} \geq \sqrt[\alpha]{n_1n_2...n_q}
+\frac{n_{1} + n_{2} + ... + n_{a}} {\alpha} \geq \sqrt[\alpha]{n_{1}n_{2}...n_{\alpha}}
 $$
 
 > **推论一：** 若拆分的数量a确定，则拆分数字相等时，乘积最大
