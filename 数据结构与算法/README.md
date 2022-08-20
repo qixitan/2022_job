@@ -453,7 +453,10 @@ $$
 
 
 $$
-\hat{y} = \begin{cases} > 0，x \in[-\infty, e) \\ < 0， X\in (e, +\infty]\end{cases}
+\hat{y} = 
+\begin{cases} 
+> 0，& x \in[-\infty, e) \\ 
+< 0，& x\in (e, +\infty]\end{cases}
 $$
 
 
