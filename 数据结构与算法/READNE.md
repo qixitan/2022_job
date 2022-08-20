@@ -141,6 +141,12 @@ class TreeNode():
 遍历方式：
 
 1. 深度优先：前序遍历，中序遍历，后序遍历；（递归、迭代）
+
+   ![](READNE.assets/2207769-20201117133754912-414183412.png)
+
+   **先(根)序遍历（根左右）：A B D H E I C F J K G**
+   **中(根)序遍历（左根右）：D H B E I A J F K C G**
+   **后(根)序遍历（左右根）：H D I E B J K F G C A**
 2. 广度优先；（迭代）
 
 ### 递归遍历
@@ -185,8 +191,6 @@ public:
 }
 ```
 
-
-
 用递归进行二叉树的后序遍历
 
 ```C++
@@ -208,6 +212,8 @@ public:
 ```
 
 ### 迭代（非递归）遍历
+
+![](READNE.assets/20200808200338924.png)
 
 利用迭代进行二叉树前序遍历
 
@@ -258,8 +264,6 @@ public:
 ```
 
 利用迭代进行二叉树后序遍历
-
-![](READNE.assets/20200808200338924.png)
 
 ```C++
 class Solution{
@@ -695,3 +699,176 @@ int main(){
 可以看出，一维dp 的01背包，要比二维简洁的多！ 初始化 和 遍历顺序相对简单了。
 
 **所以我倾向于使用一维dp数组的写法，比较直观简洁，而且空间复杂度还降了一个数量级！**
+
+### 完全背包
+
+有N件物品和一个最多能背重量为W的背包。第i件物品的重量是weight[i]，得到的价值是value[i] 。**每件物品都有无限个（也就是可以放入背包多次）**，求解将哪些物品装入背包里物品价值总和最大。
+
+**完全背包和01背包问题唯一不同的地方就是，每种物品有无限件**。
+
+首先在回顾一下01背包的核心代码
+
+```cpp
+for(int i = 0; i < weight.size(); i++) { // 遍历物品
+    for(int j = bagWeight; j >= weight[i]; j--) { // 遍历背包容量
+        dp[j] = max(dp[j], dp[j - weight[i]] + value[i]);
+    }
+}
+```
+
+我们知道01背包内嵌的循环是从大到小遍历，为了保证每个物品仅被添加一次。
+
+而完全背包的物品是可以添加多次的，所以要从小到大去遍历，即：
+
+```cpp
+// 先遍历背包，再遍历物品
+for(int j = 0; j <= bagWeight; j++) { // 遍历背包容量
+    for(int i = 0; i < weight.size(); i++) { // 遍历物品
+        if (j - weight[i] >= 0) dp[j] = max(dp[j], dp[j - weight[i]] + value[i]);
+    }
+    cout << endl;
+}
+```
+
+**如果求组合数就是外层for循环遍历物品，内层for遍历背包**。
+
+**如果求排列数就是外层for遍历背包，内层for循环遍历物品**。
+
+完整的C++测试代码如下：
+
+```cpp
+// 先遍历物品，在遍历背包
+void test_CompletePack() {
+    vector<int> weight = {1, 3, 4};
+    vector<int> value = {15, 20, 30};
+    int bagWeight = 4;
+    vector<int> dp(bagWeight + 1, 0);
+    for(int i = 0; i < weight.size(); i++) { // 遍历物品
+        for(int j = weight[i]; j <= bagWeight; j++) { // 遍历背包容量
+            dp[j] = max(dp[j], dp[j - weight[i]] + value[i]);
+        }
+    }
+    cout << dp[bagWeight] << endl;
+}
+int main() {
+    test_CompletePack();
+}
+```
+
+```cpp
+// 先遍历背包，再遍历物品
+void test_CompletePack() {
+    vector<int> weight = {1, 3, 4};
+    vector<int> value = {15, 20, 30};
+    int bagWeight = 4;
+
+    vector<int> dp(bagWeight + 1, 0);
+
+    for(int j = 0; j <= bagWeight; j++) { // 遍历背包容量
+        for(int i = 0; i < weight.size(); i++) { // 遍历物品
+            if (j - weight[i] >= 0) dp[j] = max(dp[j], dp[j - weight[i]] + value[i]);
+        }
+    }
+    cout << dp[bagWeight] << endl;
+}
+int main() {
+    test_CompletePack();
+}
+```
+
+### 背包总结
+
+![](READNE.assets/20210117171307407.png)
+
+1. 确定dp数组（dp table）以及下标的含义
+2. 确定递推公式
+3. dp数组如何初始化
+4. 确定遍历顺序
+5. 举例推导dp数组
+
+**其实这五部里哪一步都很关键，但确定递推公式和确定遍历顺序都具有规律性和代表性，所以下面我从这两点来对背包问题做一做总结**。
+
+#### 【背包递推公式】
+
+- 问能否能装满背包（或者最多装多少）：$dp[j] = max(dp[j], dp[j - nums[i]] + nums[i])$; ，对应题目如下：
+
+  - [动态规划：416.分割等和子集(opens new window)](https://programmercarl.com/0416.分割等和子集.html)
+
+  - [动态规划：1049.最后一块石头的重量 II](https://programmercarl.com/1049.最后一块石头的重量II.html)
+
+- 问装满背包有几种方法：$dp[j] += dp[j - nums[i]]$ ，对应题目如下：
+
+  - [动态规划：494.目标和(opens new window)](https://programmercarl.com/0494.目标和.html)
+
+  - [动态规划：518. 零钱兑换 II(opens new window)](https://programmercarl.com/0518.零钱兑换II.html)
+
+  - [动态规划：377.组合总和Ⅳ(opens new window)](https://programmercarl.com/0377.组合总和Ⅳ.html)
+
+  - [动态规划：70. 爬楼梯进阶版（完全背包）](https://programmercarl.com/0070.爬楼梯完全背包版本.html)
+
+- 问背包装满最大价值：dp[j] = max(dp[j], dp[j - weight[i]] + value[i]); ，对应题目如下：
+
+  - [动态规划：474.一和零(opens new window)](https://programmercarl.com/0474.一和零.html)
+
+- 问装满背包所有物品的最小个数：dp[j] = min(dp[j - coins[i]] + 1, dp[j]); ，对应题目如下：
+
+  - [动态规划：322.零钱兑换(opens new window)](https://programmercarl.com/0322.零钱兑换.html)
+
+  - [动态规划：279.完全平方数](https://programmercarl.com/0279.完全平方数.html)
+
+#### 【遍历顺序】
+
+**01背包：**
+
+1. 二维dp数组01背包先遍历物品或背包都是可以的，且第二层仓小到大遍历。
+2. 一维dp数组01背包只能先遍历物品再遍历背包容量，且第二层从大到小遍历。
+
+**完全背包：**
+
+1. 纯万年泉背包先遍历物品/背包都可以，且第二层for循环从小到大遍历。
+2. **如果求【组合数】就是外层遍历物品，内层遍历背包。**
+3. **如果求【排列数】就是外层遍历背包， 内层遍历物品。**
+
+相关题目如下：
+
+- 求组合数：[动态规划：518.零钱兑换II(opens new window)](https://programmercarl.com/0518.零钱兑换II.html)
+- 求排列数：[动态规划：377. 组合总和 Ⅳ (opens new window)](https://mp.weixin.qq.com/s/Iixw0nahJWQgbqVNk8k6gA)、[动态规划：70. 爬楼梯进阶版（完全背包）](https://programmercarl.com/0070.爬楼梯完全背包版本.html)
+
+如果求最小数，那么两层for循环的先后顺序就无所谓了，相关题目如下：
+
+- 求最小数：[动态规划：322. 零钱兑换 (opens new window)](https://programmercarl.com/0322.零钱兑换.html)、[动态规划：279.完全平方数](https://programmercarl.com/0279.完全平方数.html)
+
+#### **【背包问题总结】**
+
+![](READNE.assets/%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%981.jpeg)
+
+## 股票问题总结
+
+![](READNE.assets/%E8%82%A1%E7%A5%A8%E9%97%AE%E9%A2%98%E6%80%BB%E7%BB%93.jpg)
+
+### 买股票的最佳时机
+
+**股票只能买卖一次，获取最大利润**
+
+#### **【贪心】**
+
+取到左边最小值，取右边最大值，差值为最大利润，代码如下
+
+```cpp
+class Solution{
+public:
+    int maxProfit(vector<int>&prices){
+        int low = INT_MAX;
+        int res = 0;
+        for(int i = 0; i<prices.size(); i++){
+            low = min(low, prices[i]);
+            res = max(res, prices[i]-low);
+        }
+        return res;
+    }
+}
+```
+
+#### 【动规】
+
+##### 
