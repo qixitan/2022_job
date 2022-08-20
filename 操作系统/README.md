@@ -18,7 +18,7 @@ netstate -anp
 
  kill -l
 
-![](READNE.assets/信号.png)
+![](README.assets/信号.png)
 
 ### 网络信息
 
@@ -78,17 +78,17 @@ ulimit -a
 
 3. 阻塞状态
 
-4. ![](READNE.assets/ProState1.png)
+4. ![](README.assets/ProState1.png)
 
    额外两个状态： 组建状态、结束状态
 
-   ![](READNE.assets/ProState2.png)
+   ![](README.assets/ProState2.png)
 
    
 
  挂起状态：额外描述进程是否占用实际物理内存空间的情况。阻塞挂起状态，进程在外存（硬盘）并等待某个事件的出现；就绪挂起状态，进程在外存（硬盘），但只要进入内存，即可立即运行；
 
-![](READNE.assets/ProState3.png)
+![](README.assets/ProState3.png)
 
 ## PCB(进程控制块)
 
