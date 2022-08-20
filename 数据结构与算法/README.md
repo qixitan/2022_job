@@ -871,4 +871,153 @@ public:
 
 #### 【动规】
 
-##### 
+- $dp[i][0]$表示第$i$天持有的股票所得的现金。
+- $dp[i][1]$表示第$i$天不持有股票所得的现金。
+
+代码如下
+
+```cpp
+class Solution {
+public:
+    int maxProfit(vector<int>& prices) {
+        int len = prices.size();
+        if (len == 0) return 0;
+        vector<vector<int>> dp(len, vector<int>(2));
+        dp[0][0] -= prices[0];
+        dp[0][1] = 0;
+        for (int i = 1; i < len; i++) {
+            dp[i][0] = max(dp[i - 1][0], -prices[i]);
+            dp[i][1] = max(dp[i - 1][1], prices[i] + dp[i - 1][0]);
+        }
+        return dp[len - 1][1];
+    }
+};
+```
+
+### 买卖股票的最佳时机II
+
+**多次买卖**
+
+#### 【贪心】
+
+收集每天的正利润便可，代码如下：
+
+```cpp
+class Solution {
+public:
+    int maxProfit(vector<int>& prices) {
+        int result = 0;
+        for (int i = 1; i < prices.size(); i++) {
+            result += max(prices[i] - prices[i - 1], 0);
+        }
+        return result;
+    }
+};
+```
+
+#### 【动规】
+
+- $dp[i][0] $表示第$i$天持有股票所得现金
+- $dp[i][1] $表示第$i$天不持有股票所得最多现金
+
+**注意这里和[买股票的最佳时机](#买股票的最佳时机)唯一不同的地方，就是推导$dp[i][0]$的时候，第i天买入股票的情况**。
+
+代码如下：
+
+```cpp
+class Solution {
+public:
+    int maxProfit(vector<int>& prices) {
+        int len = prices.size();
+        vector<vector<int>> dp(len, vector<int>(2, 0));
+        dp[0][0] -= prices[0];
+        dp[0][1] = 0;
+        for (int i = 1; i < len; i++) {
+            dp[i][0] = max(dp[i - 1][0], dp[i - 1][1] - prices[i]); // 注意这里是和121. 买卖股票的最佳时机唯一不同的地方。
+            dp[i][1] = max(dp[i - 1][1], dp[i - 1][0] + prices[i]);
+        }
+        return dp[len - 1][1];
+    }
+};
+```
+
+### 买卖股票的最佳时机III
+
+最多买卖两次，问最大收益。
+
+【动规】
+
+一天一共就有五个状态，
+
+1. 没有操作
+2. 第一次买入
+3. 第一次卖出
+4. 第二次买入
+5. 第二次卖出
+
+$dp[i][j]$中 $i$表示第$i$天，$j$为 $[0 - 4]$ 五个状态，$dp[i][j]$表示第i天状态j所剩最大现金。
+
+达到dp[i][1]状态，有两个具体操作：
+
+- 操作一：第$i$天买入股票了，那么$dp[i][1] = dp[i-1][0] - prices[i]$
+- 操作二：第$i$天没有操作，而是沿用前一天买入的状态，即：$dp[i][1] = dp[i - 1$][1]
+
+$dp[i][1] = max(dp[i-1][0] - prices[i], dp[i - 1][1]);$
+
+同理dp[i][2]也有两个操作：
+
+- 操作一：第$i$天卖出股票了，那么$dp[i][2] = dp[i - 1][1] + prices[i]$
+- 操作二：第$i$天没有操作，沿用前一天卖出股票的状态，即：$dp[i][2] = dp[i - 1$][2]
+
+所以$dp[i][2] = max(dp[i - 1][1] + prices[i], dp[i - 1][2])$
+
+同理可推出剩下状态部分：
+
+$dp[i][3] = max(dp[i - 1][3], dp[i - 1][2] - prices[i]);$
+
+$dp[i][4] = max(dp[i - 1][4], dp[i - 1][3] + prices[i]);$
+
+代码如下：
+
+```cpp
+// 版本一
+class Solution {
+public:
+    int maxProfit(vector<int>& prices) {
+        if (prices.size() == 0) return 0;
+        vector<vector<int>> dp(prices.size(), vector<int>(5, 0));
+        dp[0][1] = -prices[0];
+        dp[0][3] = -prices[0];
+        for (int i = 1; i < prices.size(); i++) {
+            dp[i][0] = dp[i - 1][0];
+            dp[i][1] = max(dp[i - 1][1], dp[i - 1][0] - prices[i]);
+            dp[i][2] = max(dp[i - 1][2], dp[i - 1][1] + prices[i]);
+            dp[i][3] = max(dp[i - 1][3], dp[i - 1][2] - prices[i]);
+            dp[i][4] = max(dp[i - 1][4], dp[i - 1][3] + prices[i]);
+        }
+        return dp[prices.size() - 1][4];
+    }
+};
+```
+
+空间优化版本
+
+```cpp
+class Solution{
+public:
+    int maxProfit(vector<int>&prices){
+        if(prices.size()==1) return 0;
+        vector<int> dp(5, 0);
+        dp[1] -= prices[0];
+        dp[3] -= prices[0];
+        for(int i =1; i<prices.size(0; i++)){
+            dp[1] = max(dp[1], dp[0] - prices[i]);
+            dp[2] = max(dp[2], dp[1] + prices[i]);
+            dp[3] = max(dp[3], dp[2] - prices[i]);
+            dp[4] = max(dp[4], dp[3] + prices[i]);
+        }
+        return dp[4];
+    }
+}
+```
+
