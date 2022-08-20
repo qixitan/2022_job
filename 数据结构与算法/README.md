@@ -456,6 +456,20 @@ $$
 \hat{y} = \begin{cases} > 0，x \in[-\infty, e) \\ < 0， x\in (e, +\infty]\end{cases}
 $$
 
+
+
+
+$$
+f(n) =
+  \begin{cases}
+    n/2       & \quad \text{if } n \text{ is even}\\
+    -(n+1)/2  & \quad \text{if } n \text{ is odd}
+  \end{cases}
+$$
+
+
+
+
 - 由于因子 $x$必须为整数，最接近 $e$的整数为2或3，如下式所示，代入 $x=2$和 $x=3$，得出 $x=3$时乘积达到最大。
 
 $$
