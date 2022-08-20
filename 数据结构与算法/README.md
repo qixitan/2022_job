@@ -433,11 +433,11 @@ x^\alpha = x ^\frac{n}{x} = (x ^\frac{1}{x})^n
 $$
 
 
-根据问题分析，可将问题转化为求y=x^1/x^的极大值，因此对x求导数。
+根据问题分析，可将问题转化为求 $y=x^\frac{1}{x}$的极大值，因此对x求导数。
 
 
 $$
-lny = \frac{1}{n}*lnx
+lny = \frac{1}{x}*lnx
 $$
 
 $$
@@ -447,6 +447,8 @@ $$
 $$
 \hat{y}=\frac{1-lnx}{x^2}x^\frac{1}{x}
 $$
+
+
 令 $\hat{y}=0$,则 $1-lnx = 0$,易得驻点为 $x_0=e \approx2.7$；根据以下公式可知 $x_0$为极大值点。
 $$
 \hat{y} = \begin{cases} > 0，x \in[-\infty, e) \\ < 0， X\in (e, +\infty]\end{cases}
