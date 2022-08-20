@@ -450,6 +450,8 @@ $$
 
 
 令 $\hat{y}=0$,则 $1-lnx = 0$,易得驻点为 $x_0=e \approx2.7$；根据以下公式可知 $x_0$为极大值点。
+
+
 $$
 \hat{y} = \begin{cases} > 0，x \in[-\infty, e) \\ < 0， X\in (e, +\infty]\end{cases}
 $$
