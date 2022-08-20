@@ -425,16 +425,26 @@ $$
 
 > **推论一：** 若拆分的数量a确定，则拆分数字相等时，乘积最大
 
-设将数字因子 $x$等分为 $α$个，即 &n=xα&，则乘积为 x^a^。观察以下公式，由于 $n$为常数，因此当 $x^\frac{1}{n}$取最大值时，乘积达到最大。
+设将数字因子 $x$等分为 $α$个，即 $n=xα$，则乘积为 $x^a$。观察以下公式，由于 $n$为常数，因此当 $x^\frac{1}{n}$取最大值时，乘积达到最大。
+
+
 $$
 x^\alpha = x ^\frac{n}{x} = (x ^\frac{1}{x})^n
 $$
 根据问题分析，可将问题转化为求y=x^1/x^的极大值，因此对x求导数。
+
+
 $$
-\\lny = \frac{1}{n}*lnx  
-\\ \frac{1}{y}\hat{y} = \frac{1}{x^2} - \frac{1}{x^2}lnx = \frac{1-lnx}{x^2}
-\\ \hat{y}=\frac{1-lnx}{x^2}x^\frac{1}{x}
+lny = \frac{1}{n}*lnx
 $$
+$$
+\frac{1}{y}\hat{y} = \frac{1}{x^2} - \frac{1}{x^2}lnx = \frac{1-lnx}{x^2}
+$$
+
+$$
+\hat{y}=\frac{1-lnx}{x^2}x^\frac{1}{x}
+$$
+
 令 $\hat{y}=0$,则 $1-lnx = 0$,易得驻点为 $x_0=e \approx2.7$；根据以下公式可知 $x_0$为极大值点。
 $$
 \hat{y} = \begin{cases} > 0，x \in[-\infty, e) \\ < 0， X\in (e, +\infty]\end{cases}
