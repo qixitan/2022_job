@@ -1235,3 +1235,206 @@ public:
     }
 };
 ```
+
+# C++ ACM模式输入输出参考程序
+
+```c++
+#include<iostream>
+#include<sstread>
+#include<string>
+#include<vector>
+#include<algorithm>
+#include<limits.h>  // INT_MIN和INT_MAX的头文件
+using namespace std;
+struct stu{
+    string name;
+    int num;
+};
+
+
+// 1、直接输入一个数
+int main(){
+    int n = 0;
+    while(cin >> n){
+        cout <, n<<endl;
+    }
+    return -1;
+}
+
+// 2、直接输入一个字符串
+int main(){
+    string str;
+    while(cin >> str){
+        cout << str << endl;
+    }
+    return -1;
+}
+
+// 3、只读取一个字符
+int main(){
+    char ch;
+    while(cin >. ch){
+        cout << ch <<endl;
+    }
+    return -1;
+}
+
+// 3.1给定一个数，表示有多少组数（可能时数字和字符串的组合），然后读取
+int main(){
+    int n = 0;
+    while(cin >> n){    // 每次读取n+1个数，即一个样例有n+1个数
+        vector<int> num(n);
+        for(int i = 0; i < n; i++){
+            cin >> nums[i];
+        }
+        // 处理这n+1个字符串
+        for(int i = 0; i<n;i++){
+            cout << nums[i] <<endl;
+        }
+    }
+}
+
+//3.2 首先给一个数字，表示需读取n个字符，然后顺序读取n个字符
+int main() {
+	int n = 0;
+	while (cin >> n) {  //输入数量
+		vector<string> strs;
+		for (int i = 0; i < n; i++) {
+			string temp;
+			cin >> temp;
+			strs.push_back(temp);
+		}
+		//处理这组字符串
+		sort(strs.begin(), strs.end());
+		for (auto& str : strs) {
+			cout << str << ' ';
+		}
+	}
+	return 0;
+}
+
+
+// 4.为给定数据个数，但是每一行代表一组数据，每个数据之间用空格隔开
+//4.1使用getchar() 或者 cin.get() 读取判断是否是换行符，若是的话，则表示该组数（样例）结束了，需进行处理
+int main() {
+	int ele;
+	while (cin >> ele) {
+		int sum = ele;
+		// getchar()   //读取单个字符
+		/*while (cin.get() != '\n') {*/   //判断换行符号
+		while (getchar() != '\n') {  //如果不是换行符号的话，读到的是数字后面的空格或者table
+			int num;
+			cin >> num;
+			sum += num;
+		}
+		cout << sum << endl;
+	}
+	return 0;
+}
+
+
+//4.2 给定一行字符串，每个字符串用空格间隔，一个样例为一行
+int main() {
+	string str;
+	vector<string> strs;
+	while (cin >> str) {
+		strs.push_back(str);
+		if (getchar() == '\n') {  //控制测试样例
+			sort(strs.begin(), strs.end());
+			for (auto& str : strs) {
+				cout << str << " ";
+			}
+			cout << endl;
+			strs.clear();
+		}
+	}
+	return 0;
+}
+
+//4.3 使用getline 读取一整行数字到字符串input中，然后使用字符串流stringstream，读取单个数字或者字符。
+int main() {
+	string input;
+	while (getline(cin, input)) {  //读取一行
+		stringstream data(input);  //使用字符串流
+		int num = 0, sum = 0;
+		while (data >> num) {
+			sum += num;
+		}
+		cout << sum << endl;
+	}
+	return 0;
+}
+
+
+//4.4 使用getline 读取一整行字符串到字符串input中，然后使用字符串流stringstream，读取单个数字或者字符。
+int main() {
+	string words;
+	while (getline(cin, words)) {
+		stringstream data(words);
+		vector<string> strs;
+		string str;
+		while (data >> str) {
+			strs.push_back(str);
+		}
+		sort(strs.begin(), strs.end());
+		for (auto& str : strs) {
+			cout << str << " ";
+		}
+	}
+}
+
+//4.5 使用getline 读取一整行字符串到字符串input中，然后使用字符串流stringstream，读取单个数字或者字符。每个字符中间用','间隔
+int main() {
+	string line;
+	
+	//while (cin >> line) {  //因为加了“，”所以可以看出一个字符串读取
+	while(getline(cin, line)){
+		vector<string> strs;
+		stringstream ss(line);
+		string str;
+		while (getline(ss, str, ',')) {
+			strs.push_back(str);
+		}
+		//
+		sort(strs.begin(), strs.end());
+		for (auto& str : strs) {
+			cout << str << " ";
+		}
+		cout << endl;
+	}
+	return 0;
+}
+
+
+
+int main() {
+	string str;
+
+	
+	//C语言读取字符、数字
+	int a;
+	char c;
+	string s;
+
+	scanf_s("%d", &a);
+	scanf("%c", &c);
+	scanf("%s", &s);
+	printf("%d", a);
+
+
+	//读取字符
+	char ch;
+	cin >> ch;
+	ch = getchar();
+	while (cin.get(ch)) { //获得单个字符
+		;
+	}
+	
+	//读取字符串
+	cin >> str;  //遇到空白停止
+	getline(cin, str);  //读入一行字符串
+
+}
+
+```
+
