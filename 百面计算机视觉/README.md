@@ -952,3 +952,289 @@ $$
 
 - 在$BN$之后，连接一个$Dropout$。
 - 修改 Dropout 的公式让它对方差并不那么敏感。有工作是进一步拓展了高斯$Dropout$(即不是满足伯努利分布，而是Mask满足高斯分布)，提出了一个均匀分布$Dropout$，这样做带来了一个好处就是这个形式的$Dropout$（又称为$“Uout”$）对方差的偏移的敏感度降低了，总得来说就是整体方差偏地没有那么厉害了。而实验结果也是第二种整体上比第一个方案好，显得更加稳定。
+
+## 更大的Bach_size
+
+### 使用Trick，节省显寸
+
+- 使用inplace操作，比如relu激活函数，我们可以使用inplace=True
+- 每次循环结束时候，我们可以手动删除loss，但是这样的操作，效果有限。
+- 使用float16混合精度计算，据有关人士测试过，使用apex，能够节省将近50%的显存，但是还是要小心mean与sum会溢出的操作。
+- **训练过程中的显存占用包括前向与反向所保存的值，所以在我们不需要bp的forward的时候，我们可以使用torch.no_grad()。**
+- torch.cuda.empty_cache() 这是del的进阶版，使用nvidia-smi 会发现显存有明显的变化。但是训练时最大的显存占用似乎没变。大家可以试试。
+- 如使用将batchsize=32这样的操作，分成两份，进行forward，再进行backward，不过这样会影响batchnorm与batchsize相关的层。yolo系列cfg文件里面有一个参数就是将batchsize分成几个sub batchsize的。
+- 使用pooling，减小特征图的size，如使用GAP等来代替FC等。
+- optimizer的变换使用，理论上，显寸占用情况 sgd<momentum<adam，可以从计算公式中看出有额外的中间变量。
+
+## 标签平滑（label smoothing）
+
+标签平滑采用如下思路：**在训练时即假设标签可能存在错误，避免“过分”相信训练样本的标签。当目标函数为交叉熵时，这一思想有非常简单的实现，称为标签平滑（ $Label smoothing$）。**
+
+在每次迭代时，并不直接将( ${x_i},{y_i}$)放入训练集，而是设置一个错误率 $ \epsilon$，以 1-$\epsilon$ 的概率将(${x_i},{y_i}$)代入训练，以 $\epsilon$ 的概率将(${x_i},1-{y_i}$)代入训练。
+
+## Normalization
+
+### 数据归一化
+
+**主要且常用**的归一化操作有**BN，LN，IN，GN**，示意图如图所示。
+
+![](README.assets/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f363933352f37383432636533652d613630662d346333372d623532302d3938383531353337663136642e706e67.png)
+
+```python
+def Layernorm(x, gamma, beta):
+    # x_shape:[B, C, H, W]
+    results = 0.
+    eps = 1e-5
+    x_mean = np.mean(x, axis=(1, 2, 3), keepdims=True)
+    x_var = np.var(x, axis=(1, 2, 3), keepdims=True)
+    x_normalized = (x - x_mean) / np.sqrt(x_var + eps)
+    results = gamma * x_normalized + beta
+    return results
+```
+
+```python
+def Instancenorm(x, gamma, beta):
+    # x_shape:[B, C, H, W]
+    results = 0.
+    eps = 1e-5
+    x_mean = np.mean(x, axis=(2, 3), keepdims=True)
+    x_var = np.var(x, axis=(2, 3), keepdims=True)
+    x_normalized = (x - x_mean) / np.sqrt(x_var + eps)
+    results = gamma * x_normalized + beta
+    return results
+```
+
+```python
+def GroupNorm(x, gamma, beta, G=16):
+
+    # x_shape:[B, C, H, W]
+    # gamma， beta, scale, offset : [1, c, 1, 1]
+    # G: num of groups for GN
+    results = 0.
+    eps = 1e-5
+    x = np.reshape(x, (x.shape[0], G, x.shape[1]/G, x.shape[2], x.shape[3]))
+
+    x_mean = np.mean(x, axis=(2, 3, 4), keepdims=True)
+    x_var = np.var(x, axis=(2, 3, 4), keepdims=True)
+    x_normalized = (x - x_mean) / np.sqrt(x_var + eps)
+    results = gamma * x_normalized + beta
+    return results
+```
+
+## Reparameter
+
+### 网络结构中的重参数技巧
+
+**卷积层+BN层融合**
+
+卷积层公式为：  $$ \operatorname{Conv}(x)=W(x)+b $$ 而BN层公式为：  $$ B N(x)=\gamma * \frac{(x-\text { mean })}{\sqrt{\text { var }}}+\beta $$ 然后我们将卷积层结果带入到BN公式中：    $$ B N(\operatorname{Conv}(x))=\gamma * \frac{W(x)+b-\text { mean }}{\sqrt{v a r}}+\beta $$ 进一步化简为  $$ B N(\operatorname{Conv}(x))=\frac{\gamma * W(x)}{\sqrt{v a r}}+\left(\frac{\gamma *(b-m e a n)}{\sqrt{v a r}}+\beta\right) $$ 这其实就是一个卷积层, 只不过权盖考虑了BN的参数。
+
+令：  $$ \begin{array}{c} W_{\text {fused }}=\frac{\gamma * W}{\sqrt{v a r}} \ B_{\text {fused }}=\frac{\gamma *(b-\text { mean })}{\sqrt{v a r}}+\beta \end{array} $$ 最终的融合结果即为：  $$ B N(\operatorname{Conv}(x))=W_{\text {fused }}(x)+B_{\text {fused }} $$
+
+- **RepVGG**
+
+![](README.assets/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f363933352f65306661373133362d643866332d346135372d386136362d3161613736393135333666662e706e67.png)
+
+**$RepVGG$ 中主要的改进点包括：**
+
+- 在 VGG 网络的 Block 块中加入了 Identity 和残差分支，相当于把 ResNet 网络中的精华应用 到 VGG 网络中;
+- 模型推理阶段，通过 $O_{p}$ 融合策略将所有的网络层都转换为 Conv 3 * 3，便于模型的部署与加速。
+- 网络训练和网络推理阶段使用不同的网络架构，训练阶段更关注精度，推理阶段更关注速度。
+
+![](README.assets/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f363933352f35653030303662352d306166642d343562662d626530312d6136663364366634636537342e706e67.png)
+
+上图展示了模型推理阶段的重参数化过程，其实就是一个 $O_{p}$融合和 $O_{p}$替换的过程。图 A 从结构化的角度展示了整个重参数化流程， 图 B 从模型参数的角度展示了整个重参数化流程。整个重参数化步骤如下所示：
+
+- 首先将残差块中的卷积层和BN层进行融合。途中第一个蓝色箭头上方，完成了几组卷积与$BN$的融合。包括执行$Conv$ 3 * 3+$BN$层的融合，图中的黑色矩形框中执行$Conv$ 1 * 1+$BN$层的融合，图中的黄色矩形框中执行$Conv$ 3 * 3(卷积核设置为全1)+$BN$层的融合
+  融合的公式为：$\mathrm{W}*{i, \mathrm{i}, \mathrm{i}, \mathrm{i}}^{\prime}=\frac{\gamma*{i}}{\sigma_{i}} \mathrm{~W}*{i, \mathrm{r}, \mathrm{i}, \mathrm{i}}, \quad \mathbf{b}*{i}^{\prime}=-\frac{\boldsymbol{\mu}*{i} \gamma*{i}}{\boldsymbol{\sigma}*{i}}+\boldsymbol{\beta}*{i}$。
+
+其中 $W_{i}$表示转换前的卷积层参数,  $\mu_{i}$ 表示BN层的均值, $\sigma_{i}$ 表示BN层的方差, $\gamma_{i}$ 和 $\beta_{i}$ 分别表示BN层的尺店因子和偏移因 子, $W^{i}$和b'分别表示融合之后的卷积的权重和偏置。
+
+- 将融合后的卷积层转换为$Conv$ $3$ * $3$，即将具体不同卷积核的卷积均转换为具有$3$ * $3$大小的卷积核的卷积。 由于整个残差块中可能包含$Conv$ $1$ * $1$分支和$Identity$两种分支。对于$Conv$ $1$ * $1$分支而言，整个转换过程就是利用$3$ * $3$的卷积核替换$1$ * $1$的卷积核，即将$1$ * $1$卷积核中的数值移动到$3$ * $3$卷积核的中心点即可；对于$Identity$分支 而言，该分支并没有改变输入的特征映射的数值，那么我们可以设置一个$3$ * $3$的卷积核，将所有的$9$个位置处的权重值都设置为1，那么它与输入的特征映射相乘之后，保持了原来的数值。合并残差分支中的$Conv$ $3$ * $3$。 即将所有分支的权重$W$和偏置$B$叠加起来，从而获得一个融合之后的$Conv$ $3$ * $3$网络层。
+- 合并残差分支中的$Conv$ $3$ * $3$。 即将所有分支的权重$W$和偏置$B$叠加起来，从而获得一个融合之后的$Conv$ $3$ * $3$网络层。
+
+```python
+def _fuse_bn_tensor(self, branch):
+      if branch is None:
+          return 0, 0
+      if isinstance(branch, nn.Sequential):
+          kernel = branch.conv.weight
+          running_mean = branch.bn.running_mean
+          running_var = branch.bn.running_var
+          gamma = branch.bn.weight
+          beta = branch.bn.bias
+          eps = branch.bn.eps
+      else:
+          ...
+      std = (running_var + eps).sqrt()
+      t = (gamma / std).reshape(-1, 1, 1, 1)
+      return kernel * t, beta - running_mean * gamma / std
+```
+
+## ResNet
+
+### 1、ResNet解决了什么问题？
+
+- 梯度消失与梯度爆炸：因为很深的网络，选择了不合适的激活函数，在很深的网络中进行梯度反传，梯度在链式法则中就会变成0或者无穷大，导致系统不能收敛。然而梯度弥散（消失）/爆炸在很大程度上被合适的激活函数(**ReLU**)、牛逼的网络初始化(**Kaiming初始化**`、`**BN**等Tricks)处理了。
+- ![](README.assets/68747470733a2f2f63646e2e6e6c61726b2e636f6d2f79757175652f302f323032312f706e672f313136303332322f313631373238393634383231332d36333261623831612d316636662d346537382d613231382d3532613135313361653664642e706e67)
+
+**ResNet本身是一种拟合残差的结果，让网络学习任务更简单，可以有效地解决梯度弥散的问题。**
+
+**ResNet**网络变种包括**ResNet V1**、**ResNet V2**、**ResNext**`以及**Res2Net**网络等。
+
+### 2、ResNet网络结构与其性能优异的原因
+
+ResNet残差块的结构如图所示。
+
+![image](README.assets/68747470733a2f2f63646e2e6e6c61726b2e636f6d2f79757175652f302f323032312f706e672f313136303332322f313631373238393634383433322d35373639316637622d646430652d343434322d613735352d3561373661646439613538322e706e67)]
+
+`ResNet`网络的优点有：
+
+- 引入跳跃连接，允许数据直接流向任何后续项。
+- 引入残差网络，可以使得网络层数非常深，可以达到`1000`层以上。
+
+同样，`ResNet`网络的设计技巧有：
+
+- 理论上较深的模型不应该比和它对应的较浅的模型更差，较深的模型可以理解为是先构建较浅的模型，然后添加很多恒等映射的网络层。
+- 实际上我们较深的模型后面添加的不是恒等映射，是一些非线性层，所有网络退化问题可以看成是通过多个非线性层来近似恒等映射是困难的。解决网络退化问题的方法就是让网络学习残差。
+
+通过分析`ResNet`网络可以知道，**`ResNet`可以被看做许多路径的集合，**通过研究`ResNet`的梯度流表明，**网络训练期间只有短路径才会产生梯度流，深的路径不是必须的，通过破坏性试验可以知道，路径之间是相互依赖的，这些路径类似集成模型，**其预测准确率平滑地与有效路径的数量有关。
+
+由于`ResNet`网络中存在很多`short cut`，所以`ResNet`又可以被视为很多路径的集合网络。相关实验表明，在`ResNet`网络训练期间，**只有短路径才会产生梯度流动，说明深的路径不是必须的。**通过破坏网络中某些`short cut`实验可以看出，在**随机破坏了`ResNet`网络中的某些`short cut`后，网络依然可以训练，说明在网络中，即使这些路径是共同训练的，它们也是相互独立，不相互依赖的，可以将这些路径理解为集成模型，**这也是理解`ResNet`网络的性能较好的一个方向。
+
+### 3、ResNetv2
+
+于主干以及分支网络的各种设计：
+
+![](README.assets/68747470733a2f2f63646e2e6e6c61726b2e636f6d2f79757175652f302f323032312f706e672f313136303332322f313631373238393634383237312d30646362326366392d396661662d346338652d386639322d6565383034356139663462312e706e67)
+
+- （a）原始ResNet模块， $f(X) = ReLU(Z)$
+- （b）将BN移动到了addition之后，  $f(X) = ReLU(BN(Z))$
+- （c）将RELU移动到addition之前，$f(X)=X$
+- （d）将ReLU移动到残差块之前，$f(X)=X$
+- （e）将BN和ReLU移动到残差块之前，$f(X) = X$
+
+在图中，BN会改变数据的分布，ReLU会改变值的大小，上面五个图都是work的，但是第五个图效果最好，具体效果如下：
+
+![https://mmbiz.qpic.cn/mmbiz_png/8SMJ0xH7Shc6TKMvhYsMquReQGbevNDq4nRrgEw5Jufolq0LqS2nOVfCBwqib3WEDEMzxvCfRFeFicG0Fb9C7McQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1](https://mmbiz.qpic.cn/mmbiz_png/8SMJ0xH7Shc6TKMvhYsMquReQGbevNDq4nRrgEw5Jufolq0LqS2nOVfCBwqib3WEDEMzxvCfRFeFicG0Fb9C7McQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+
+具体效果为什么第五个好呢？先看下面的梯度求导吧！
+
+### 4. ResNet的梯度公式推导
+
+ResNet公式
+$$
+y_{l} = h(x_{l})+F(x_{l}, \omega_{l})
+$$
+简化，令indentity分支为$h(x_{l}) = x_{l}$
+$$
+X_{l+1} = X_{l} + F(X_{l}, \omega_{l})
+$$
+
+递归计算
+$$
+X_{l+2} = X_{l+1} + F(X_{l+1}, \omega_{l+1}) = X_{l} + F(X_{l+1}, \omega_{l+1})
+$$
+不失一般性有
+$$
+X_{L} = X_{l} + \sum_{i=l}^{L-1}F(X_{i}, \omega_{i})
+$$
+链式求导有：
+$$
+\frac{\partial loss}{\partial X_l} = \frac{\partial loss}{\partial X_{L}}*\frac{\partial X_{L}}{\partial X_{l}} = \frac{\partial loss}{\partial X_{L}}*(1+\frac{\partial \sum_{i=l}^{L-1} F({X_{i}, \omega_{i})}}{\partial X_{l}})
+$$
+而  $\frac{\partial{loss}}{\partial{X_{l}}}$  不会恒为-1
+
+从上式我们可以看到，`ResNet`有效得防止了：“当权重很小时，梯度消失的问题”。同时，上式中的优秀特点只有在假设$h(X_{l})=X_{l}$成立时才有效。所以，ResNet需要尽量保证亮点：
+
+- 不要轻易改变identity分支的值。
+- **addition之后不再接受改变信息分布的层。**
+
+因此，在上面五组实验中，第五个(图e)效果最好的原因是：1) 反向传播基本符合假设，信息传递无阻碍；2）BN层作为pre-activation，起到了正则化的作用。
+
+对于图(b),是因为BN在addition之后会改变分布，影响传递，出现训练初期误差下降缓慢的问题！
+
+对于图(c),是因为这样做导致了Residual的分支的分布为负，影响了模型的表达能力。
+
+对图(d),与图(a)在网络上相当于是等价的，指标也基本相同。
+
+
+
+## Softmax与Sigmoid有哪些区别与联系？
+
+
+
+#### 1、Sigmoid函数
+
+Sigmoid函数也叫 $Logistic$函数，将输入值压缩到 $(0, 1)$区间之中，其函数表达式为 ：
+$$
+Sigmoid(x)=\frac{1}{1+e^{-x}}
+$$
+
+
+函数图像如下：
+
+![](README.assets/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f363933352f36373036353965382d303361312d343566642d613266632d3032383363643361343833312e706e67.png)
+
+其导数为：
+$$
+Sigmoid^{\prime}(x) = Sigmoid(x)*(x-Sigmoid(x))
+$$
+梯度的导数图像为：![](README.assets/640%20(1).png)
+
+对于Sigmoid函数，其优点为：
+
+- Sigmoid函数输出在（0， 1）之间，通常作为二分类方案，其输出范围有限，可以用作输出层，优化稳定。
+- Sigmoid函数是一个连续函数，方便后续求导。
+
+其缺点为：
+
+- 从函数的导函数可以得到，其值范围为(0, 0.25)，存在梯度消失的问题。
+- 不是**零均值函数**，导后一层是警员将上一层得到的非零均值的信号作为输入，从而对梯度产生影响。
+- Sigmoid函数是一个指数函数的激活函数，计算量较大
+
+#### Softmax函数
+
+ $Softmax$函数又称归一化指数函数，函数表达式为：  $$ y_{i}=\operatorname{Softmax}(x_{i})=\frac{e^{x_{i}}}{\sum_{j=1}^{n} e^{x_{j}}} $$ 其中， $i \in [1, n]$。$\sum_{i} y_{i}=1$。如网络输出为$[-20, 10, 30]$，则经过 $Softmax$层之后，输出为 $[1.9287e-22, 2.0612e-09, 1.0000e+00]$。
+
+针对 $Softmax$函数的反向传播，这里给出手撕反传的推导过程，主要是分两种情况：
+$$
+\frac{\partial{y_i}}{\partial{x_j}} = \{ \begin{array}{rcl} {y_i - y_i*y_i} & i=j \\ {-y_i*y_j} &i \neq j\end{array}
+$$
+因此，不失一般性，扩展成矩阵形式则为：
+
+  $\frac{\partial Y}{\partial X}=\operatorname{diag}(Y)-Y^{T} \cdot Y$   (当Y的shape为 $(1, \mathrm{n})$ 时)。
+
+**softmax参考代码**
+
+```python
+import numpy as np
+def softmax( f ):
+    # 为了防止数值溢出，我们将数值进行下处理
+    # f： 输入值
+    f -= np.max(f) # f becomes [-666, -333, 0]
+    return np.exp(f) / np.sum(np.exp(f))  
+```
+
+然而，这种代码就存在一个数值不稳定的情况， 如：
+
+```python
+x = np.array([5, 1, 10000, 6])
+print(softmax(x))
+#[0.0,  0.0, nan,  0.0]
+```
+
+根据公式，可以修改成： $S_{i}=\frac{e^{i-c}}{\sum_{j}e^{j-c}}$。代码因此修改成：
+
+```python
+def softmax(x):
+    max_x = np.max(x) # 最大值
+    exp_x = np.exp(x - max_x)
+    sum_exp_x = np.sum(exp_x)
+    sm_x = exp_x/sum_exp_x
+    return sm_x
+print(softmax(x))
+#[0., 0., 1., 0.]
+```
+
+softmax可以直接与交叉熵损失函数结合在一起用，训练一个分类网络模型。它的特点就是**优化类间的距离非常棒，但是优化类内距离时比较弱**。

@@ -204,6 +204,427 @@ public:
 };
 ```
 
+## 识别有效IP地址和掩码并进行分类
+
+### 描述
+
+请解析IP地址和对应的掩码，进行分类识别。要求按照A/B/C/D/E类地址归类，不合法的地址和掩码单独归类。
+
+所有的IP地址划分为 A,B,C,D,E五类
+
+A类地址从1.0.0.0到126.255.255.255;
+
+B类地址从128.0.0.0到191.255.255.255;
+
+C类地址从192.0.0.0到223.255.255.255;
+
+D类地址从224.0.0.0到239.255.255.255；
+
+E类地址从240.0.0.0到255.255.255.255
+
+
+
+私网IP范围是：
+
+从10.0.0.0到10.255.255.255
+
+从172.16.0.0到172.31.255.255
+
+从192.168.0.0到192.168.255.255
+
+子网掩码为二进制下前面是连续的1，然后全是0。（例如：255.255.255.32就是一个非法的掩码）
+
+（注意二进制下全是1或者全是0均为非法子网掩码）
+
+注意：
+
+\1. 类似于【0.*.*.*】和【127.*.*.*】的IP地址不属于上述输入的任意一类，也不属于不合法ip地址，计数时请忽略
+
+\2. 私有IP地址和A,B,C,D,E类地址是不冲突的
+
+
+
+### 输入描述：
+
+多行字符串。每行一个IP地址和掩码，用~隔开。
+
+请参考帖子https://www.nowcoder.com/discuss/276处理循环输入的问题。
+
+### 输出描述：
+
+统计A、B、C、D、E、错误IP地址或错误掩码、私有IP的个数，之间以空格隔开。
+
+### 示例1
+
+
+
+```tex
+// 输入
+10.70.44.68~255.254.255.0
+1.0.0.1~255.0.0.0
+192.168.0.2~255.255.255.0
+19..0.~255.255.255.0
+
+// 输出
+1 0 1 0 0 2 1
+
+// 说明
+10.70.44.68~255.254.255.0的子网掩码非法，19..0.~255.255.255.0的IP地址非法，所以错误IP地址或错误掩码的计数为2；
+1.0.0.1~255.0.0.0是无误的A类地址；
+192.168.0.2~255.255.255.0是无误的C类地址且是私有IP；
+所以最终的结果为1 0 1 0 0 2 1        
+```
+
+
+
+```cpp
+#include<bits/stdc++.h>
+#include<string.h>
+#include<sstream>
+using namespace std;
+vector<int> bf(string s1)
+{
+    vector<int> a;
+    int i=0,j=0;
+     while(i<s1.size())
+        {
+        while(i<s1.size() && s1[i]!='.')i++;
+        string temp=s1.substr(j,i-j);
+        if(temp.size()==0)a.push_back(-1);
+        else{
+        int t=stoi(temp,0);
+            a.push_back(t);
+        }
+            i++;
+            j=i;
+        }
+    if(a.size()==3)a.push_back(-1);
+    return a;
+}
+bool checkym(vector<int> a)
+{
+    set<int> si{0,128,192,224,240,248,252,254};
+    for(int i=0;i<a.size();i++)
+    {
+        if(a[i]<0)
+        {
+            return false;
+        }
+    }
+        if(a[0]==0)return false;
+        if(a[0]==255){
+            if(a[1]==255)
+            {
+                if(a[2]==255){
+                    if(si.find(a[3])!=si.end()&&a[3]!=255)return true;
+                    else return false;
+                }
+                else
+                {
+                    if(si.find(a[2])!=si.end()&&a[3]==0)
+                    {
+                    return true;
+                    }
+                    else
+                    return false;
+                }
+            }
+            else
+            {
+                if(si.find(a[1])!=si.end()&&a[2]==0&&a[3]==0)
+                    {
+                    return true;
+                    }
+                    else 
+                    return false;
+            }
+        }
+        else
+            {
+                if(si.find(a[0])!=si.end()&&a[1]==0&&a[2]==0&&a[3]==0)
+                return true;
+                else 
+                return false;
+            }
+}
+  
+  
+bool checkip(vector<int> a)
+{
+    for(int i=0;i<a.size();i++)
+    {
+        if(a[i]<0)return false;
+    }
+    return true;
+}
+    
+int main(){
+    string s;
+    int an[7];
+    memset(an,0,sizeof(an));
+    while(cin>>s){
+        int m=0;
+        string s1,s2;
+        while(m<s.size() && s[m]!='~'){m++;}
+        s1=s.substr(0,m);
+        s2=s.substr(m+1,s.size()-m);
+        vector<int> a1,a2;
+        a1=bf(s1);
+        a2=bf(s2);
+        if(a1[0]==0||a1[0]==127)continue;
+        else
+        {
+        //a1是处理好的ip容器a2为子网掩码
+        //掩码处理
+        bool fip=checkip(a1);
+        bool fym=checkym(a2);
+        if((a1[0]>=1&&a1[0]<=126)&&fym&&fip)  an[0]+=1;
+        if((a1[0]>=128&&a1[0]<=191)&&fym&&fip)an[1]+=1;
+        if((a1[0]>=192&&a1[0]<=223)&&fym&&fip)an[2]+=1;
+        if((a1[0]>=224&&a1[0]<=239)&&fym&&fip)an[3]+=1;
+        if((a1[0]>=240&&a1[0]<=255)&&fym&&fip){an[4]+=1;}
+
+        if(((a1[0]==10)||(a1[0]==172&&(a1[1]>=16&&a1[1]<=31))||(a1[0]==192&&a1[1]==168))&&fym&&fip)an[6]+=1;
+
+        if(fym+fip==1||fym+fip==0){an[5]+=1;}
+        }
+    }
+        for(int i=0;i<7;i++){
+            cout<<an[i]<<" ";
+        }
+}
+
+
+```
+
+## 判断是否为素数
+
+```cpp
+bool isprime(int num){
+    for(int i=2; i*i<=nums; i++){
+        if(num%i==0) return false;
+    }
+    return true;
+}
+```
+
+
+
+# C++ ACM模式输入输出参考程序
+
+```cpp
+// 常用头文件
+#include<iostream>
+#include<string>
+#include<vector>
+#include<algorithm>
+#include<cctype>  //isalpha() tou'wen
+#include<limits.h>  // INT_MIN和INT_MAX的头文件
+#include<sstream>  // stringstream头文件
+```
+
+
+
+```cpp
+#include<iostream>
+#include<sstread>
+#include<string>
+#include<vector>
+#include<algorithm>
+#include<limits.h>  // INT_MIN和INT_MAX的头文件
+#include<sstream>  // stringstream头文件
+using namespace std;
+struct stu{
+    string name;
+    int num;
+};
+
+
+// 1、直接输入一个数
+int main(){
+    int n = 0;
+    while(cin >> n){
+        cout <, n<<endl;
+    }
+    return -1;
+}
+
+// 2、直接输入一个字符串
+int main(){
+    string str;
+    while(cin >> str){
+        cout << str << endl;
+    }
+    return -1;
+}
+
+// 3、只读取一个字符
+int main(){
+    char ch;
+    while(cin >. ch){
+        cout << ch <<endl;
+    }
+    return -1;
+}
+
+// 3.1给定一个数，表示有多少组数（可能时数字和字符串的组合），然后读取
+int main(){
+    int n = 0;
+    while(cin >> n){    // 每次读取n+1个数，即一个样例有n+1个数
+        vector<int> num(n);
+        for(int i = 0; i < n; i++){
+            cin >> nums[i];
+        }
+        // 处理这n+1个字符串
+        for(int i = 0; i<n;i++){
+            cout << nums[i] <<endl;
+        }
+    }
+}
+
+//3.2 首先给一个数字，表示需读取n个字符，然后顺序读取n个字符
+int main() {
+	int n = 0;
+	while (cin >> n) {  //输入数量
+		vector<string> strs;
+		for (int i = 0; i < n; i++) {
+			string temp;
+			cin >> temp;
+			strs.push_back(temp);
+		}
+		//处理这组字符串
+		sort(strs.begin(), strs.end());
+		for (auto& str : strs) {
+			cout << str << ' ';
+		}
+	}
+	return 0;
+}
+
+
+// 4.为给定数据个数，但是每一行代表一组数据，每个数据之间用空格隔开
+//4.1使用getchar() 或者 cin.get() 读取判断是否是换行符，若是的话，则表示该组数（样例）结束了，需进行处理
+int main() {
+	int ele;
+	while (cin >> ele) {
+		int sum = ele;
+		// getchar()   //读取单个字符
+		/*while (cin.get() != '\n') {*/   //判断换行符号
+		while (getchar() != '\n') {  //如果不是换行符号的话，读到的是数字后面的空格或者table
+			int num;
+			cin >> num;
+			sum += num;
+		}
+		cout << sum << endl;
+	}
+	return 0;
+}
+
+
+//4.2 给定一行字符串，每个字符串用空格间隔，一个样例为一行
+int main() {
+	string str;
+	vector<string> strs;
+	while (cin >> str) {
+		strs.push_back(str);
+		if (getchar() == '\n') {  //控制测试样例
+			sort(strs.begin(), strs.end());
+			for (auto& str : strs) {
+				cout << str << " ";
+			}
+			cout << endl;
+			strs.clear();
+		}
+	}
+	return 0;
+}
+
+//4.3 使用getline 读取一整行数字到字符串input中，然后使用字符串流stringstream，读取单个数字或者字符。
+int main() {
+	string input;
+	while (getline(cin, input)) {  //读取一行
+		stringstream data(input);  //使用字符串流
+		int num = 0, sum = 0;
+		while (data >> num) {
+			sum += num;
+		}
+		cout << sum << endl;
+	}
+	return 0;
+}
+
+
+//4.4 使用getline 读取一整行字符串到字符串input中，然后使用字符串流stringstream，读取单个数字或者字符。
+int main() {
+	string words;
+	while (getline(cin, words)) {
+		stringstream data(words);
+		vector<string> strs;
+		string str;
+		while (data >> str) {
+			strs.push_back(str);
+		}
+		sort(strs.begin(), strs.end());
+		for (auto& str : strs) {
+			cout << str << " ";
+		}
+	}
+}
+
+//4.5 使用getline 读取一整行字符串到字符串input中，然后使用字符串流stringstream，读取单个数字或者字符。每个字符中间用','间隔
+int main() {
+	string line;
+	
+	//while (cin >> line) {  //因为加了“，”所以可以看出一个字符串读取
+	while(getline(cin, line)){
+		vector<string> strs;
+		stringstream ss(line);
+		string str;
+		while (getline(ss, str, ',')) {
+			strs.push_back(str);
+		}
+		//
+		sort(strs.begin(), strs.end());
+		for (auto& str : strs) {
+			cout << str << " ";
+		}
+		cout << endl;
+	}
+	return 0;
+}
+
+
+
+int main() {
+	string str;
+
+	
+	//C语言读取字符、数字
+	int a;
+	char c;
+	string s;
+
+	scanf_s("%d", &a);
+	scanf("%c", &c);
+	scanf("%s", &s);
+	printf("%d", a);
+
+
+	//读取字符
+	char ch;
+	cin >> ch;
+	ch = getchar();
+	while (cin.get(ch)) { //获得单个字符
+		;
+	}
+	
+	//读取字符串
+	cin >> str;  //遇到空白停止
+	getline(cin, str);  //读入一行字符串
+
+}
+```
+
 
 
 # 计算机网络
