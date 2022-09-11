@@ -397,6 +397,31 @@ int main(){
 
 ```
 
+## 判断掩码是否正确并返回
+
+```cpp
+#include<sstream>
+vector<int> getMask(string input){
+    stringstream iss(input);
+    string temp;
+    unsigned m = 0;
+    vector<int> mask;
+    while(getline(iss, temp, '.')){
+        m = (m<<8) + stoi(temp);
+        mask.emplace_back(stoi(temp));
+    }
+ 
+    if(m == 0 || (m^(m-1)) == 1 || ((m&(m-1)) != (m<<1)) ){//判断子网掩码网络号是否全1，主机号是否全0
+        mask.clear();              //子网掩码全0或者全1都不行
+    }
+    if(mask.size() > 4) mask.clear();
+    return mask;
+}
+
+```
+
+
+
 ## 判断是否为素数
 
 ```cpp
@@ -418,7 +443,7 @@ bool isprime(int num){
 #include<string>
 #include<vector>
 #include<algorithm>
-#include<cctype>  //isalpha() tou'wen
+#include<cctype>  //isalpha() 头文件
 #include<limits.h>  // INT_MIN和INT_MAX的头文件
 #include<sstream>  // stringstream头文件
 ```
