@@ -1298,14 +1298,12 @@ hard就是正常网络训练的目标，是要尽量的完成正确的分类。
    V_t = \Psi(g_1, g_2, \cdots, g_{t})
    $$
    
-
 3. 计算当前时刻的下降梯度：
    $$
    p = \eta \frac{m_{t}}{\sqrt{V_{t}}}(自适应优化器) \\
    p = \eta * g_{t}(非自适应优化器)
    $$
    
-
 4. 进行梯度下降更新
    $$
    \theta_{t+1} =\theta_{t}-p
@@ -1326,3 +1324,71 @@ hard就是正常网络训练的目标，是要尽量的完成正确的分类。
 4. label smoothing
 5. knowledge distillation
 6. 数据增强 mixup 、cutout、random erase data augmentation。
+
+## 算法指标汇总
+
+### 常见机器学习分类指标
+
+**【常用指标】**
+
+1. acc
+
+   <table>
+       <tr>
+           <td></td>
+           <td> 预测为正样本</td>
+           <td> 预测为负样本</td>
+       </tr>
+        <tr>
+           <td> 标签为正样本</td>
+           <td> TP</td>
+           <td> FN</td>
+       </tr>
+       <tr>
+           <td> 标签为负样本</td>
+           <td> FP</td>
+           <td> TN</td>
+       </tr>
+   $$
+   accuracy = \frac{TP+TN}{TP+TN+FP+FN}
+   $$
+
+   accuracy指的是正确预测的样本数占总预测样本数的比值，它不考虑预测的样本是正例还是负例,**考虑的是全部样本**。
+
+2. precision（查准率）
+   $$
+   precision = \frac{TP}{TP+FP}
+   $$
+   **precision**指的是正确预测的正样本数占所有预测为正样本的数量的比值，也就是说所有预测为正样本的样本中有多少是真正的正样本。从这我们可以看出，**precision**只**关注预测为正样本**的部分，
+
+3. recall（召回率）
+   $$
+   recall = \frac{TP}{TP+FN}
+   $$
+   它指的是正确预测的正样本数占真实正样本总数的比值，**也就是我能从这些样本中能够正确找出多少个正样本**。
+
+4. F-score
+   $$
+   F_{score} = \frac{2}{\frac{1}{precision}+\frac{1}{recall}}
+   $$
+   **F-score**相当于**precision**和**recall**的调和平均，用意是要参考两个指标。从公式我们可以看出，**recall**和**precision**任何一个数值减小，**F-score**都会减小，反之，亦然。
+
+5. specificity
+   $$
+   \text { specificity }=\frac{T N}{T N+F P} 
+   $$
+   指的是**正确预测的负样本数占真实负样本总数的比值**，也就是**我能从这些样本中能够正确找出多少个负样本**。
+
+6. sensitivity（TPR）
+   $$
+   sensitivity = \frac{TP}{TP+FN} = recall
+   $$
+   
+
+7. P-R曲线
+
+   我们将纵轴设置为**precison**，横轴设置成**recall**，改变阈值就能获得一系列的**pair**并绘制出曲线。对于不同的模型在相同数据集上的预测效果，我们可以画出一系列的PR曲线。一般来说如果一个曲线完全“包围”另一个曲线，我们可以认为该模型的分类效果要好于对比模型。
+
+   ![](README.assets/68747470733a2f2f66696c65732e6d646e6963652e636f6d2f757365722f363933352f62666135306331302d306164382d343239342d623664622d6538326562323633643334332e706e67.png)
+
+8. 

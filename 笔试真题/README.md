@@ -446,6 +446,7 @@ bool isprime(int num){
 #include<cctype>  //isalpha() 头文件
 #include<limits.h>  // INT_MIN和INT_MAX的头文件
 #include<sstream>  // stringstream头文件
+#include<bits/stdc++.h>  // 万能头文件 quan'bu
 ```
 
 
