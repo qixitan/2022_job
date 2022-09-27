@@ -1,0 +1,196 @@
+.single-selection {
+  position: absolute;
+  border: solid rgba(1, 136, 251, 0.1);
+  box-shadow: #4b8cff 0px 0px 0px 2px;
+  box-sizing: border-box;
+  display: none;
+  pointer-events: none;
+}
+
+.smart-corner {
+  position: absolute;
+  background-color: #4b8cff;
+  height: 9px;
+  width: 9px;
+  border: 2px solid #ffffff;
+  cursor: crosshair;
+  z-index: 4;
+  display: none;
+  transform: translate(-4.5px, -4.5px);
+  box-sizing: border-box;
+}
+.smart-corner.no-cursor {
+  cursor: unset;
+}
+
+.range-move-dragger {
+  position: absolute;
+  background-color: transparent;
+  cursor: -webkit-grab;
+  cursor: grab;
+  z-index: 2;
+  display: none;
+}
+.range-move-dragger:active {
+  cursor: -webkit-grabbing;
+  cursor: grabbing;
+}
+.range-move-dragger.no-cursor {
+  cursor: unset;
+}
+
+.multiple-selection {
+  position: absolute;
+  border: solid rgba(1, 136, 251, 0.1);
+  box-shadow: #4b8cff 0px 0px 0px 1px;
+  box-sizing: border-box;
+  display: none;
+  pointer-events: none;
+}
+.multiple-selection-active {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  background: hsla(0, 0%, 100%, 0.1);
+  box-shadow: #4b8cff 0px 0px 0px 1px;
+}
+
+.formula-selection {
+  position: absolute;
+  border-width: 2px;
+  border-style: dashed;
+  box-sizing: border-box;
+  box-shadow: 0 0 6px 2px #dddddd;
+  pointer-events: none;
+}
+
+.scroll-x-wrap-pc {
+  position: absolute;
+  height: 8px;
+  box-sizing: border-box;
+  bottom: 2px;
+  z-index: 106;
+}
+.scroll-y-wrap-pc {
+  position: absolute;
+  width: 8px;
+  right: 2px;
+  box-sizing: border-box;
+  z-index: 106;
+}
+
+.scroll-y-board-pc {
+  position: absolute;
+  width: 12px;
+  right: 0;
+  padding: 0 2px;
+  box-sizing: border-box;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  z-index: 102;
+  transition: right 0.5s ease;
+  top: 7px;
+  bottom: 10px;
+}
+.scroll-y-box-pc {
+  position: absolute;
+  width: 8px;
+  right: 2px;
+  top: 0;
+  border-radius: 5px;
+  background-color: #CBCDD1;
+  opacity: 0.88;
+  transition: background-color, width 0.15s cubic-bezier(0.25, 0.1, 0.25, 0.1);
+}
+.scroll-y-box-pc:hover {
+  width: 10px;
+  background-color: #888888;
+}
+.scroll-y-box-pad {
+  background-color: #CBCDD1;
+  border-radius: 4px;
+}
+
+.scroll-x-board-pc {
+  position: absolute;
+  height: 12px;
+  bottom: 0;
+  padding: 2px 0;
+  box-sizing: border-box;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  z-index: 102;
+  transition: right 0.5s ease;
+  left: 7px;
+  right: 10px;
+}
+.scroll-x-box-pc {
+  position: absolute;
+  height: 8px;
+  bottom: 2px;
+  left: 0;
+  border-radius: 5px;
+  background-color: #CBCDD1;
+  opacity: 0.88;
+  transition: background-color, width 0.15s cubic-bezier(0.25, 0.1, 0.25, 0.1);
+}
+.scroll-x-box-pc:hover {
+  height: 10px;
+  background-color: #888888;
+}
+.scroll-x-box-pad {
+  background-color: #CBCDD1;
+  border-radius: 4px;
+}
+
+
+.shape-wrap {
+  position: absolute;
+  z-index: 10;
+}
+.shape-image-box {
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+.shape-image-box img {
+  pointer-events: none;
+  position: absolute;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+}
+
+.loading-failed-pic-placeholder {
+  width: 100%;
+  height: 100%;
+  color: #c2c2c2;
+  font-size: 14px;
+  background-color: #f9fafb;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+}
+.loading-failed-pic-placeholder-icon {
+  width: 48px;
+  height: 48px;
+  background-image: url(//docs.gtimg.com/sheet/assets/placeholder_48_image@3x.bed65ae27cb4bc151ecf.png);
+  background-size: cover;
+  background-position: center;
+}
+.loading-failed-pic-placeholder-tip {
+  width: 100%;
+  text-align: center;
+  padding-top: 8px;
+}
+
+
+/*# sourceMappingURL=initial_core_part_3.e7d6cb02f645c66b35e6.css.map*/

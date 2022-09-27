@@ -1,0 +1,20 @@
+.autofill-list-item {
+  padding: 0 8px;
+  color: #2b2b2b;
+  font-size: 14px;
+  cursor: pointer;
+  line-height: 30px;
+  max-width: 100%;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.autofill-list-item.autofill-list-item_active {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+.autofill-list-item .autofill-list-item_match {
+  color: #1E6FFF;
+}
+
+
+/*# sourceMappingURL=bundle_plugin_inputautofill.34880bd32dee94699ab1.css.map*/

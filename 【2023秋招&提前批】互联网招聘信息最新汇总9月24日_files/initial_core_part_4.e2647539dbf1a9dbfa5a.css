@@ -1,0 +1,35 @@
+.user-custom-theme-container {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+.user-custom-theme-container-box {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+.user-custom-theme-container-box li {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  opacity: 0;
+  transition-duration: 2s;
+}
+.user-custom-theme-container-box li:first-child {
+  opacity: 1;
+}
+.user-custom-theme-container-box li img {
+  width: 100%;
+  height: 100%;
+  -o-object-fit: cover;
+     object-fit: cover;
+}
+
+
+/*# sourceMappingURL=initial_core_part_4.e2647539dbf1a9dbfa5a.css.map*/

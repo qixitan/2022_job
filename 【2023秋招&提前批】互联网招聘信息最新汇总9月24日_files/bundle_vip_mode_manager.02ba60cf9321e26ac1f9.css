@@ -1,0 +1,66 @@
+.mode-drawer-container {
+  position: absolute;
+  top: 21px;
+  padding-left: 16px;
+  padding-right: 32px;
+}
+.mode-drawer-container .mode-drawer-header-container {
+  height: 22px;
+  display: flex;
+  justify-content: space-between;
+}
+.mode-drawer-container .mode-drawer-header-container .mode-drawer-header-title {
+  font-family: 'PingFang SC';
+  font-style: normal;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 22px;
+  font-feature-settings: 'fina' on, 'init' on;
+  color: rgba(0, 0, 0, 0.88);
+}
+.mode-drawer-container .mode-drawer-header-container .close-button {
+  width: 17px;
+  height: 17px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  outline: 0;
+  background: url(data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjE2IiB2aWV3Qm94PSIwIDAgMTYgMTYiIHdpZHRoPSIxNiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNOC42MzIgOEwxMyAxMi4zNjhsLS42MzIuNjMyTDggOC42MzIgMy42MzIgMTMgMyAxMi4zNjggNy4zNjggOGwtMS4wMy0xLjAzTDMgMy42MzIgMy42MzIgMyA4IDcuMzY4IDEyLjM2OCAzbC42MzIuNjMyTDkuNjYxIDYuOTd6IiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIG9wYWNpdHk9Ii42NCIvPjwvc3ZnPg==) no-repeat center;
+}
+.mode-drawer-container .mode-drawer-header-container .close-button:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+.mode-drawer-container .mode-drawer-header-container .close-button:active {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+.mode-drawer-container .mode-drawer-content {
+  margin-top: 10px;
+}
+
+.selectable-menu-description {
+  display: block;
+  margin-top: 28px;
+  margin-bottom: 7px;
+  font-family: 'PingFang SC';
+  font-style: normal;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 16px;
+  /* identical to box height, or 133% */
+  font-feature-settings: 'rclt' off;
+  /* 腾讯文档 TDoc-Light/文本 Text/text-medium */
+  color: rgba(0, 0, 0, 0.4);
+}
+.selectable-menu-content .menu-container {
+  box-shadow: none;
+  border: 0px;
+}
+.selectable-menu-content .menu-item {
+  height: 20px;
+  font-size: 14px;
+  line-height: 20px;
+  color: rgba(0, 0, 0, 0.88);
+}
+
+
+/*# sourceMappingURL=bundle_vip_mode_manager.02ba60cf9321e26ac1f9.css.map*/
