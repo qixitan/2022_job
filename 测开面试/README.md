@@ -35,8 +35,22 @@ TCP（Transmission Control Protocol 传输控制协议）是一种面向连接�
 
 ## [http协议](https://blog.csdn.net/u010710458/article/details/79636625)
 
-### [android软件卡顿的原因](https://blog.csdn.net/weixin_52700281/article/details/122883733)
+## [http和https的区别](https://www.cnblogs.com/vickylinj/p/10925733.html)
 
-### [arp协议攻击](https://blog.csdn.net/qq_48708303/article/details/116446976)
+## [android软件卡顿的原因](https://blog.csdn.net/weixin_52700281/article/details/122883733)
 
-### [ftp协议端口号](https://edu.iask.sina.com.cn/jy/a9m9tZtsyC2.html)
+## [arp协议攻击](https://blog.csdn.net/qq_48708303/article/details/116446976)
+
+## [arp广播](https://baike.baidu.com/item/ARP/609343?fr=aladdin)
+
+## [ftp协议端口号](https://edu.iask.sina.com.cn/jy/a9m9tZtsyC2.html)
+
+# 测试
+
+## [自动化测试的优缺点](https://blog.csdn.net/qq_37964547/article/details/82384976)
+
+## [局域网采用什么协议](https://baike.baidu.com/item/%E5%B1%80%E5%9F%9F%E7%BD%91%E5%8D%8F%E8%AE%AE/2298655)
+
+## [测试方法有哪些](https://blog.csdn.net/qq_45042752/article/details/125893902)
+
+## [如何对复制粘贴进行测试](https://blog.csdn.net/qq_60219215/article/details/118883402)
